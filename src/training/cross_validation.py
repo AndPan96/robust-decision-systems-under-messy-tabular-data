@@ -1,9 +1,11 @@
 from sklearn.model_selection import KFold
 import pandas as pd
+from typing import cast
+from src.actions.preprocess import preprocess_fit
 
 def generate_outer_folds(X: pd.DataFrame, y: pd.Series, n_splits=5):
 
-    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    kf = KFold(n_splits=n_splits, shuffle=False)
 
     folds = []
 
@@ -15,6 +17,10 @@ def generate_outer_folds(X: pd.DataFrame, y: pd.Series, n_splits=5):
         X_val = X.iloc[val_idx]
         y_val = y.iloc[val_idx]
 
-        folds.append((X_train, y_train, X_val, y_val))
+        X_train_imp, preprocessor = preprocess_fit(X_train)
+        X_train_imp = cast(pd.DataFrame, X_train_imp)
+        X_val_imp = cast(pd.DataFrame, preprocessor.transform(X_val))
+
+        folds.append((X_train_imp, y_train, X_val_imp, y_val))
 
     return folds

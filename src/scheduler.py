@@ -5,7 +5,7 @@ from src.pipelines.inference import inference_pipeline
 from src.pipelines.monitoring import monitoring_pipeline
 from src.pipelines.retrain_all import retrain_all_pipeline
 from src.pipelines.retrain_single import retrain_single_pipeline
-from src.pipelines.update_rows import update_rows_pipeline
+from pipelines.up_rows import update_rows_pipeline
 
 from src.config.state import load_state, save_state
 

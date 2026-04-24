@@ -1,6 +1,6 @@
 import pandas as pd
 from src.config.data_config import RETRAIN_THRESHOLD, MONITOR_WINDOW
-from src.config.paths import PROCESSED_PREDS, DATASET_PATH
+from src.config.paths import PROCESSED_IDS, PROCESSED_PREDS, PROCESSED_X, DATASET_PATH
 
 def monitor_model():
 
@@ -19,8 +19,15 @@ def monitor_model():
     df = df.sort_values("SK_ID_CURR").tail(MONITOR_WINDOW)
 
     acc = (df["TARGET_PRED"] == df["TARGET"]).mean()
+    res = (acc < RETRAIN_THRESHOLD)
+
+    if res:
+        pd.read_parquet(PROCESSED_IDS).iloc[0:0].to_parquet(PROCESSED_IDS, index=False)
+        pd.read_parquet(PROCESSED_PREDS).iloc[0:0].to_parquet(PROCESSED_PREDS, index=False)
+        pd.read_parquet(PROCESSED_X).iloc[0:0].to_parquet(PROCESSED_X, index=False)
+
 
     return {
         "accuracy": acc,
-        "retrain": (acc < RETRAIN_THRESHOLD)
+        "retrain": res
     }

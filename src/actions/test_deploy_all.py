@@ -2,8 +2,10 @@ from src.actions.train_all import train_all
 from src.config.registry import deploy_model, DEVICE
 from src.config.data_config import DEPLOY_THRESHOLD
 from src.config.state import load_state, save_state
+from typing import cast
 import pandas as pd
 import torch
+from src.actions.preprocess import preprocess_fit
 from src.config.paths import TRAINING_X, TRAINING_Y, TEST_X, TEST_Y
 
 def test_deploy_all():
@@ -17,14 +19,19 @@ def test_deploy_all():
     models = train_all(X_train, y_train, "TBD", 5, DEVICE)
     best_model = max(models, key= lambda m : m["metrics"]["accuracy_mean"])
 
+    _, preprocessor = preprocess_fit(X_train)
+    X_test_imp = cast(pd.DataFrame, preprocessor.transform(X_test))
+
+
     model: torch.nn.Module = best_model["model"]
     model.eval()
     with torch.no_grad():
-        X_tensor = torch.tensor(X_test.values, dtype=torch.float32).to(DEVICE)
+        X_tensor = torch.tensor(X_test_imp.values, dtype=torch.float32).to(DEVICE)
         y_tensor = torch.tensor(y_test.values, dtype=torch.long).to(DEVICE)
         logits = model(X_tensor)
         preds = torch.argmax(logits, dim=1)
         test_accuracy = (preds == y_tensor).float().mean().item()
+
 
     state = load_state()
 
@@ -32,9 +39,10 @@ def test_deploy_all():
         meta = {
             "name": best_model["name"],
             "class_model_name": best_model["class_model_name"],
-            "metrics": best_model["metrics"]
+            "metrics": best_model["metrics"],
+            "input_dim": best_model["input_dim"]
         }
-        deploy_model(best_model["model"], meta)
+        deploy_model(best_model["model"], preprocessor, meta)
         state["retrain_required"] = False
         state["retrain_single"] = False
         print("All models retraining succeded: deployed.")

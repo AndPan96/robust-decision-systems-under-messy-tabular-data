@@ -1,6 +1,8 @@
 import pytest
 import pandas as pd
+from unittest.mock import patch
 from src.training.cross_validation import generate_outer_folds
+from sklearn.preprocessing import FunctionTransformer
 
 @pytest.fixture
 def fake_load():
@@ -12,11 +14,17 @@ def fake_load():
 
     return X, y
 
+def fake_preprocess_fit(X):
+        return X, FunctionTransformer()
+
 def test_cross_validation(fake_load):
 
     X, y = fake_load
 
-    folds = generate_outer_folds(X, y, 5)
+    
+
+    with patch("src.training.cross_validation.preprocess_fit", side_effect=fake_preprocess_fit):
+        folds = generate_outer_folds(X, y, 5)
 
     assert isinstance(folds, list)
     assert len(folds) == 5

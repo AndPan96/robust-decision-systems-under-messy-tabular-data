@@ -6,7 +6,8 @@ STATE_FILE = Path("data/state/state.json")
 DEFAULT_STATE = {
     "retrain_required": False,
     "retrain_single": False,
-    "retrain_all": False
+    "retrain_all": False,
+    "transform_required": True
 }
 
 def load_state():

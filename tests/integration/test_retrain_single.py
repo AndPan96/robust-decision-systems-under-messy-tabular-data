@@ -1,12 +1,18 @@
 from unittest.mock import patch
 from src.pipelines.retrain_single import retrain_single_pipeline
 
-def test_retrain_single_pipeline():
+def test_retrain_single_pipeline(set_environment, reset_environment):
 
-    with patch("src.pipelines.retrain_single.train_split") as mock_train_split, \
-        patch("src.pipelines.retrain_single.test_deploy_model") as mock_test_deploy_model:
+    try:
+        set_environment()
 
-        retrain_single_pipeline()
+        with patch("src.pipelines.retrain_single.train_split") as mock_train_split, \
+            patch("src.pipelines.retrain_single.test_deploy_model") as mock_test_deploy_model:
 
-        assert mock_train_split.call_count == 1
-        assert mock_test_deploy_model.call_count == 1
+            retrain_single_pipeline()
+
+            assert mock_train_split.call_count == 1
+            assert mock_test_deploy_model.call_count == 1
+
+    finally:
+        reset_environment()

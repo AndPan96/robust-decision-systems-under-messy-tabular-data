@@ -1,33 +1,46 @@
 import pandas as pd
 import json
 from unittest.mock import patch
-from src.pipelines.update_rows import update_rows_pipeline
-from src.config.paths import DATASET_PATH, UPDATES_FILE
+from src.pipelines.up_rows import update_rows_pipeline
+from src.config.paths import RAW_APPLICATION_TRAIN, UPDATES_FILE, PROCESSED_IDS, PROCESSED_PREDS, PROCESSED_X
 from pathlib import Path
 
-def test_update_rows_pipeline():
+def test_update_rows_pipeline(set_environment, reset_environment):
 
-    df = pd.DataFrame({
-        "SK_ID_CURR": [1, 2, 3],
-        "F1": [.1, .2, .3],
-        "TARGET": [None, None, 1]
-    })
+    try:
+        set_environment()
 
-    df.to_csv(DATASET_PATH, index=False)
+        df = pd.DataFrame({
+            "SK_ID_CURR": [1, 2, 3],
+            "F1": [.1, .2, .3],
+            "TARGET": [None, None, 1]
+        })
 
-    updates = [
-        {"SK_ID_CURR": 1, "TARGET": 0},
-        {"SK_ID_CURR": 3, "TARGET": 0},
-        {"SK_ID_CURR": 999, "TARGET": 1}
-    ]
+        df.to_csv(RAW_APPLICATION_TRAIN, index=False)
 
-    with open(UPDATES_FILE, "w") as f:
-        json.dump(updates, f)
+        pd.DataFrame(columns=["SK_ID_CURR"]).to_parquet(PROCESSED_IDS, index=False)
+        pd.DataFrame(columns=["TARGET_PRED"]).to_parquet(PROCESSED_PREDS, index=False)
+        pd.DataFrame(columns=["PLACEHOLDER"]).to_parquet(PROCESSED_X, index=False)
 
-    update_rows_pipeline()
+        updates = {
+            "application_train": [
+                {"SK_ID_CURR": 1, "TARGET": 0},
+                {"SK_ID_CURR": 3, "TARGET": 1},
+                {"SK_ID_CURR": 4, "TARGET": 1}
+            ]
+        }
 
-    updated_df = pd.read_csv(DATASET_PATH)
+        with open(UPDATES_FILE, "w") as f:
+            json.dump(updates, f)
 
-    assert updated_df.loc[updated_df["SK_ID_CURR"] == 1, "TARGET"].iloc[0] == 0
-    assert updated_df.loc[updated_df["SK_ID_CURR"] == 3, "TARGET"].iloc[0] == 1
-    assert not UPDATES_FILE.exists()
+        update_rows_pipeline()
+
+        updated_df = pd.read_csv(RAW_APPLICATION_TRAIN)
+
+        assert updated_df.loc[updated_df["SK_ID_CURR"] == 1, "TARGET"].iloc[0] == 0
+        assert updated_df.loc[updated_df["SK_ID_CURR"] == 3, "TARGET"].iloc[0] == 1
+        assert 4 in updated_df["SK_ID_CURR"].values
+        assert not UPDATES_FILE.exists()
+
+    finally:
+        reset_environment()

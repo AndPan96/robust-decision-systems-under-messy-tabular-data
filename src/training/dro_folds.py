@@ -5,7 +5,7 @@ import pandas as pd
 
 def generate_inner_fold_loaders(X: pd.DataFrame, y: pd.Series, n_splits=3, batch_size = 256):
 
-    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    kf = KFold(n_splits=n_splits, shuffle=False)
 
     loaders = []
 

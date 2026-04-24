@@ -26,6 +26,10 @@ class PriorModel(nn.Module):
         logits = self.forward(X)
         return torch.argmax(logits, dim=1)
     
+    def to(self, device):
+        self.logits = self.logits.to(device)
+        return self
+    
     
     def __call__(self, X):
         return self.forward(X)

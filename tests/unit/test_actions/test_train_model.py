@@ -16,9 +16,9 @@ def fake_load():
     return X, y
 
 class DummyModel(nn.Module):
-    def __init__(self):
+    def __init__(self, input_dim):
         super().__init__()
-        self.layer = nn.Linear(2, 2)
+        self.layer = nn.Linear(input_dim, 2)
 
     def forward(self, x):
         return self.layer(x)
@@ -26,6 +26,7 @@ class DummyModel(nn.Module):
 def test_train_model(fake_load):
 
     X, y = fake_load
+    mysteps = 2
 
     with patch("src.actions.train_model.dro_train_epoch") as mock_dro_train_epoch, \
         patch("src.actions.train_model.generate_inner_fold_loaders") as mock_generate_inner_fold_loaders, \
@@ -38,29 +39,39 @@ def test_train_model(fake_load):
                 "train_params": {
                     "lr": .01,
                     "batch_size": 2,
-                    "steps": 2
-                }
+                    "steps": mysteps
+                },
+                "input_dim": 2
             }
-        }
-        ):
+        }), \
+        patch("src.actions.train_model.FEATURE_SCHEMA", {
+            "mean": ["F1", "F2"],
+            "zero": [],
+            "binary": []
+        }):
     
         X_tensor = torch.tensor(X.values, dtype=torch.float)
         y_tensor = torch.tensor(y.values, dtype=torch.long)
         X_val = torch.randn(4, 2)
         y_val = torch.tensor([1, 1, 0, 0])
 
-        mock_generate_outer_folds.return_value = [(X_tensor, y_tensor, X_val, y_val)]
+        mock_generate_outer_folds.return_value = [(X_tensor, y_tensor, X_val, y_val),
+                                                  (X_tensor, y_tensor, X_val, y_val),
+                                                  (X_tensor, y_tensor, X_val, y_val),
+                                                  (X_tensor, y_tensor, X_val, y_val),
+                                                  (X_tensor, y_tensor, X_val, y_val)]
 
         mock_generate_inner_fold_loaders.return_value = []
 
         mock_dro_train_epoch.return_value = .5
 
-        result = train_model(DummyModel, X, y, "TBD", 5, "cpu")
+        mysplits = 5
+        result = train_model(DummyModel, X, y, "TBD", mysplits, "cpu")
 
         assert isinstance(result, dict)
         assert "model" in result
         assert "metrics" in result
         assert "hyperparams" in result
-        assert mock_dro_train_epoch.call_count == 2
-        assert mock_generate_inner_fold_loaders.call_count == 1
+        assert mock_dro_train_epoch.call_count == (mysplits + 1) * mysteps
+        assert mock_generate_inner_fold_loaders.call_count == mysplits + 1
         assert mock_generate_outer_folds.call_count == 1

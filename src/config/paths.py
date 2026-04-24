@@ -1,6 +1,13 @@
 from pathlib import Path
 
-STATE_PATH = Path("data/state/predict_checkpoint.json")
+RAW_DIR = Path("data/raw")
+RAW_APPLICATION_TRAIN = RAW_DIR / "application_train.csv"
+RAW_BUREAU_BALANCE = RAW_DIR / "bureau_balance.csv"
+RAW_BUREAU = RAW_DIR / "bureau.csv"
+RAW_CREDIT_CARD_BALANCE = RAW_DIR / "credit_card_balance.csv"
+RAW_INSTALLMENTS_PAYMENTS = RAW_DIR / "installments_payments.csv"
+RAW_POS_CASH_BALANCE = RAW_DIR / "POS_CASH_balance.csv"
+RAW_PREVIOUS_APPLICATION = RAW_DIR / "previous_application.csv"
 
 DATASET_PATH = Path("data/raw/dataset.csv")
 UPDATES_FILE = Path("data/incoming/updates.json")
