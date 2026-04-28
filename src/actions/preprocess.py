@@ -5,6 +5,12 @@ from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardSc
 import pandas as pd
 from src.actions.transform_data import FEATURE_SCHEMA
 
+def map_normalize(X: pd.DataFrame) -> pd.DataFrame:
+    return X.apply(lambda col: col.map(
+                        lambda v: 1 if v == 1 or v == 1.0
+                        else (0 if v == 0 or v == 0.0 else "UNKNOWN")
+                    ))
+
 def map_unknown(X: pd.DataFrame) -> pd.DataFrame:
     return X.astype(str).where(X.astype(str).isin(["0", "1"]), "UNKNOWN")
 
@@ -26,12 +32,7 @@ def preprocess_fit(X : pd.DataFrame):
                 ("scaler", StandardScaler())
             ]), zero_cols),
             ("cat", Pipeline([
-                ("normalize", FunctionTransformer(
-                    lambda X: X.apply(lambda col: col.map(
-                        lambda v: 1 if v == 1 or v == 1.0
-                        else (0 if v == 0 or v == 0.0 else "UNKNOWN")
-                    ))
-                )),
+                ("normalize", FunctionTransformer(map_normalize)),
                 ("map_unknown", FunctionTransformer(map_unknown)),
                 ("onehot", OneHotEncoder(
                     categories=[["0", "1", "UNKNOWN"]] * len(cat_cols),

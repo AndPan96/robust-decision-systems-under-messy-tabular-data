@@ -1,11 +1,34 @@
 import pytest
 from unittest.mock import patch
 from src.pipelines.monitoring import monitoring_pipeline
+from src.utils.reports import create_new_report_folder, REPORT_MONITORING_DIR
+from src.config.registry import deploy_model
+import pandas as pd
+from src.models.linear_model import LinearModel
+from sklearn.compose import ColumnTransformer
 
 def test_monitoring_pipeline(set_environment, reset_environment):
 
     try:
         set_environment()
+
+        report_path, plots_path = create_new_report_folder(REPORT_MONITORING_DIR)
+        metrics_path = report_path / "metrics.parquet"
+        pd.DataFrame(columns=["timestamp", "accuracy", "n_samples"]).to_parquet(metrics_path)
+        model = LinearModel(1, 2)  
+        preprocessor = ColumnTransformer([])  
+
+        deploy_model(
+            model,
+            preprocessor,
+            {
+                "model_class_name": "LinearModel",
+                "metrics": {},
+                "input_dim": 1,
+                "report_path": report_path,
+                "plots_path": plots_path
+            }
+        )
 
         with patch("src.pipelines.monitoring.monitor_model") as mock_monitor_model, \
             patch("src.pipelines.monitoring.load_state") as mock_load_state, \
@@ -25,7 +48,8 @@ def test_monitoring_pipeline(set_environment, reset_environment):
 
             mock_monitor_model.return_value = {
                 "accuracy": .9,
-                "retrain": False
+                "retrain": False,
+                "n_samples": 100
             }
 
             monitoring_pipeline()
@@ -40,7 +64,8 @@ def test_monitoring_pipeline(set_environment, reset_environment):
 
             mock_monitor_model.return_value = {
                 "accuracy": .9,
-                "retrain": True
+                "retrain": True,
+                "n_samples": 100
             }
 
             mock_load_state.return_value = {"retrain_required": False}

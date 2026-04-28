@@ -185,3 +185,7 @@ def transform_data():
         df.to_csv(DATASET_PATH, index=False)
         state["transform_required"] = False
         save_state(state)
+
+        return True
+    else:
+        return False

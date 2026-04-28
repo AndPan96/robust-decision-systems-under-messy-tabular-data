@@ -1,12 +1,14 @@
 from src.actions.train_all import train_all
 from src.config.registry import deploy_model, DEVICE
-from src.config.data_config import DEPLOY_THRESHOLD
+from src.config.data_config import DEPLOY_THRESHOLD, CV_FOLDS
 from src.config.state import load_state, save_state
 from typing import cast
 import pandas as pd
 import torch
 from src.actions.preprocess import preprocess_fit
 from src.config.paths import TRAINING_X, TRAINING_Y, TEST_X, TEST_Y
+from src.utils.email import send_email
+from src.utils.reports import create_new_report_folder, REPORT_MONITORING_DIR
 
 def test_deploy_all():
 
@@ -16,10 +18,10 @@ def test_deploy_all():
     X_test = pd.read_parquet(TEST_X)
     y_test = pd.read_parquet(TEST_Y)["TARGET"]
 
-    models = train_all(X_train, y_train, "TBD", 5, DEVICE)
+    _, preprocessor = preprocess_fit(X_train)
+    models = train_all(X_train, y_train, "TBD", CV_FOLDS, DEVICE)
     best_model = max(models, key= lambda m : m["metrics"]["accuracy_mean"])
 
-    _, preprocessor = preprocess_fit(X_train)
     X_test_imp = cast(pd.DataFrame, preprocessor.transform(X_test))
 
 
@@ -36,11 +38,14 @@ def test_deploy_all():
     state = load_state()
 
     if test_accuracy > DEPLOY_THRESHOLD:
+        report_path, plots_path = create_new_report_folder(REPORT_MONITORING_DIR)
         meta = {
             "name": best_model["name"],
-            "class_model_name": best_model["class_model_name"],
+            "model_class_name": best_model["model_class_name"],
             "metrics": best_model["metrics"],
-            "input_dim": best_model["input_dim"]
+            "input_dim": best_model["input_dim"],
+            "report_path": report_path,
+            "plots_path": plots_path
         }
         deploy_model(best_model["model"], preprocessor, meta)
         state["retrain_required"] = False
@@ -48,6 +53,10 @@ def test_deploy_all():
         print("All models retraining succeded: deployed.")
     else:
         state["retrain_all"] = True
+        send_email("Retrain FAILED", 
+            f"Retrain Failed.\n Best Accuracy:{test_accuracy:.4f}\n Threshold:{DEPLOY_THRESHOLD:.4f}")
         print("All models retraining failed.")
 
     save_state(state)
+
+    return models

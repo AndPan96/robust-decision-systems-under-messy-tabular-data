@@ -13,7 +13,7 @@ def fake_loader():
 
     for _ in range(3):
         X = torch.randn(8, 5)
-        y = torch.randint(0,1, (8,))
+        y = torch.randint(0,2, (8,))
         df = TensorDataset(X, y)
         loader = DataLoader(df, batch_size=4)
         loaders.append(loader)
@@ -26,7 +26,9 @@ def fake_optim(fake_model: torch.nn.Module):
 
 def test_dro(fake_model, fake_loader, fake_optim):
 
-    avg_loss = dro_train_epoch(fake_model, fake_loader, fake_optim, "cpu")
+    step_losses = dro_train_epoch(fake_model, fake_loader, fake_optim, "cpu")
 
-    assert isinstance(avg_loss, float)
-    assert avg_loss > 0
+    assert isinstance(step_losses, list)
+    assert len(step_losses) > 0
+    assert all(isinstance(l, float) for l in step_losses)
+    assert all(l > 0 for l in step_losses)

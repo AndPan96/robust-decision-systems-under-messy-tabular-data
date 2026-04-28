@@ -1,12 +1,14 @@
 from src.actions.train_split import train_split
 from src.actions.train_model import train_model
 from src.config.registry import load_current_model, deploy_model, DEVICE
-from src.config.data_config import DEPLOY_THRESHOLD
+from src.config.data_config import DEPLOY_THRESHOLD, CV_FOLDS
 from src.config.state import load_state, save_state
 from typing import cast
 import pandas as pd
 import torch
+from sklearn.compose import ColumnTransformer
 from src.config.paths import TRAINING_X, TRAINING_Y, TEST_X, TEST_Y
+from src.utils.reports import create_new_report_folder, REPORT_MONITORING_DIR
 
 def test_deploy_model():
 
@@ -16,10 +18,11 @@ def test_deploy_model():
     X_test = pd.read_parquet(TEST_X)
     y_test = pd.read_parquet(TEST_Y)["TARGET"]
 
-    current_model, preprocessor, _ = load_current_model()
-    X_test_imp = cast(pd.DataFrame, preprocessor.transform(X_test))
+    current_model, _, _ = load_current_model()
+    new_model = train_model(type(current_model), X_train, y_train, "TBD", CV_FOLDS, DEVICE)
 
-    new_model = train_model(type(current_model), X_train, y_train, "TBD", 5, DEVICE)
+    preprocessor: ColumnTransformer = new_model["preprocessor"]
+    X_test_imp = cast(pd.DataFrame, preprocessor.transform(X_test))
 
     model: torch.nn.Module = new_model["model"]
     model.eval()
@@ -33,11 +36,14 @@ def test_deploy_model():
     state = load_state()
 
     if test_accuracy > DEPLOY_THRESHOLD:
+        report_path, plots_path = create_new_report_folder(REPORT_MONITORING_DIR)
         meta = {
             "name": new_model["name"],
-            "class_model_name": new_model["class_model_name"],
+            "model_class_name": new_model["model_class_name"],
             "metrics": new_model["metrics"],
-            "input_dim": new_model["input_dim"]
+            "input_dim": new_model["input_dim"],
+            "report_path": report_path,
+            "plots_path": plots_path
         }
         deploy_model(new_model["model"], preprocessor, meta)
         state["retrain_required"] = False
@@ -48,3 +54,5 @@ def test_deploy_model():
         print("Same model retraining failed.")
 
     save_state(state)
+
+    return new_model

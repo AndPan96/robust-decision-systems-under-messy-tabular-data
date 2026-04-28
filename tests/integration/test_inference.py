@@ -108,7 +108,12 @@ def test_inference_pipeline(set_environment, reset_environment):
         preprocessor.set_output(transform="pandas")
         preprocessor.fit(df[feature_cols])
         model = LinearModel(len(feature_cols), 2)
-        deploy_model(model, preprocessor, {"model_class_name": "LinearModel", "metrics": {}, "input_dim": len(feature_cols)})
+        deploy_model(model, preprocessor, {
+            "model_class_name": "LinearModel", 
+            "metrics": {}, 
+            "input_dim": len(feature_cols),
+            "report_path": "./",
+            "plots_path": "./"})
 
         inference_pipeline()
 

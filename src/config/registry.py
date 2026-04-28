@@ -25,9 +25,9 @@ MODEL_REGISTRY = {
                 "num_classes": 2
             },
             "train_params": {
-                "lr" : .01,
+                "lr" : .001,
                 "batch_size" : 256,
-                "steps": 500
+                "steps": 35
             }
         },
     "MLP": {
@@ -36,9 +36,9 @@ MODEL_REGISTRY = {
                 "num_classes": 2
             },
             "train_params": {
-                "lr" : .01,
+                "lr" : .001,
                 "batch_size" : 256,
-                "steps": 500
+                "steps": 35
             }
         }
 }
@@ -52,6 +52,9 @@ def load_current_model():
     
     with open(MODEL_META) as f:
         meta = json.load(f)
+
+    meta["report_path"] = Path(meta["report_path"])
+    meta["plots_path"] = Path(meta["plots_path"])
 
     model_class_name = meta["model_class_name"]
     model_input_dim = meta["input_dim"]
@@ -67,7 +70,7 @@ def load_current_model():
 
     preprocessor: ColumnTransformer = joblib.load(PREPROCESSOR_PATH)
 
-    return model, preprocessor, meta["metrics"]
+    return model, preprocessor, meta
 
 def deploy_model(model : torch.nn.Module, preprocessor: ColumnTransformer, meta: dict):
 
@@ -75,5 +78,7 @@ def deploy_model(model : torch.nn.Module, preprocessor: ColumnTransformer, meta:
 
     joblib.dump(preprocessor, PREPROCESSOR_PATH)
 
+    meta["report_path"] = str(meta["report_path"])
+    meta["plots_path"] = str(meta["plots_path"])
     with open(MODEL_META, "w") as f:
         json.dump(meta, f, indent = 2)

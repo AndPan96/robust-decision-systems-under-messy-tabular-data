@@ -8,6 +8,7 @@ def generate_outer_folds(X: pd.DataFrame, y: pd.Series, n_splits=5):
     kf = KFold(n_splits=n_splits, shuffle=False)
 
     folds = []
+    imp_input_dim = 0
 
     for train_idx, val_idx in kf.split(X):
 
@@ -21,6 +22,7 @@ def generate_outer_folds(X: pd.DataFrame, y: pd.Series, n_splits=5):
         X_train_imp = cast(pd.DataFrame, X_train_imp)
         X_val_imp = cast(pd.DataFrame, preprocessor.transform(X_val))
 
+        imp_input_dim = X_train_imp.shape[1]
         folds.append((X_train_imp, y_train, X_val_imp, y_val))
 
-    return folds
+    return folds, imp_input_dim

@@ -8,7 +8,7 @@ def dro_train_epoch(model: torch.nn.Module, fold_loaders,
     fold_iters = [iter(loader) for loader in fold_loaders]
     n_steps = min(len(loader) for loader in fold_loaders)
 
-    total_loss = .0
+    step_losses = []
 
     for _ in range(n_steps):
 
@@ -35,6 +35,6 @@ def dro_train_epoch(model: torch.nn.Module, fold_loaders,
         dro_loss.backward()
         optimizer.step()
 
-        total_loss += dro_loss.item()
+        step_losses.append(dro_loss.item())
 
-    return total_loss / n_steps
+    return step_losses

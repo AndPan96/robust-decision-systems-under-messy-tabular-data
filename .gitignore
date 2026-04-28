@@ -9,6 +9,13 @@ __pycache__/
 # untrack dataset
 data/*.csv
 
+# untrack reports
+reports/
+reports_mntr/
+
+# untrack logs
+logs/
+
 # Distribution / packaging
 .Python
 build/

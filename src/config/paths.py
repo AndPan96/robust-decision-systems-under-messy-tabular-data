@@ -1,5 +1,7 @@
 from pathlib import Path
 
+LOGS_FILE = Path("logs/app.log")
+
 RAW_DIR = Path("data/raw")
 RAW_APPLICATION_TRAIN = RAW_DIR / "application_train.csv"
 RAW_BUREAU_BALANCE = RAW_DIR / "bureau_balance.csv"

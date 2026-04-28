@@ -24,7 +24,9 @@ def fake_meta():
         "metrics": {
             "accuracy": .5
         },
-        "input_dim": 1
+        "input_dim": 1,
+        "report_path": "./",
+        "plots_path": "./"
     }
 
 def test_registry(fake_model, fake_preprocessor, fake_meta):
@@ -42,7 +44,8 @@ def test_registry(fake_model, fake_preprocessor, fake_meta):
         
         deploy_model(fake_model, fake_preprocessor, fake_meta)
 
-        model, preprocessor, metrics = load_current_model()
+        model, preprocessor, meta = load_current_model()
+        metrics = meta["metrics"]
 
         assert isinstance(model, torch.nn.Module)
         assert isinstance(preprocessor, ColumnTransformer)

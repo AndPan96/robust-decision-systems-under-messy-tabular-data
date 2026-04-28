@@ -31,6 +31,7 @@ def test_train_model(fake_load):
     with patch("src.actions.train_model.dro_train_epoch") as mock_dro_train_epoch, \
         patch("src.actions.train_model.generate_inner_fold_loaders") as mock_generate_inner_fold_loaders, \
         patch("src.actions.train_model.generate_outer_folds") as mock_generate_outer_folds, \
+        patch("src.actions.train_model.preprocess_fit") as mock_preprocess_fit, \
         patch("src.actions.train_model.MODEL_REGISTRY",
         {
             "DummyModel": {
@@ -43,27 +44,25 @@ def test_train_model(fake_load):
                 },
                 "input_dim": 2
             }
-        }), \
-        patch("src.actions.train_model.FEATURE_SCHEMA", {
-            "mean": ["F1", "F2"],
-            "zero": [],
-            "binary": []
         }):
     
         X_tensor = torch.tensor(X.values, dtype=torch.float)
         y_tensor = torch.tensor(y.values, dtype=torch.long)
-        X_val = torch.randn(4, 2)
-        y_val = torch.tensor([1, 1, 0, 0])
+        X_val = pd.DataFrame(torch.randn(4, 2).numpy())
+        y_val = pd.Series([1, 1, 0, 0])
+        imp_col_size = 2
 
-        mock_generate_outer_folds.return_value = [(X_tensor, y_tensor, X_val, y_val),
+        mock_generate_outer_folds.return_value = ([(X_tensor, y_tensor, X_val, y_val),
                                                   (X_tensor, y_tensor, X_val, y_val),
                                                   (X_tensor, y_tensor, X_val, y_val),
                                                   (X_tensor, y_tensor, X_val, y_val),
-                                                  (X_tensor, y_tensor, X_val, y_val)]
+                                                  (X_tensor, y_tensor, X_val, y_val)], imp_col_size)
 
         mock_generate_inner_fold_loaders.return_value = []
 
         mock_dro_train_epoch.return_value = .5
+
+        mock_preprocess_fit.return_value = (X, None)
 
         mysplits = 5
         result = train_model(DummyModel, X, y, "TBD", mysplits, "cpu")

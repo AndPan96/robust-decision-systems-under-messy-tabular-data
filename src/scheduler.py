@@ -1,15 +1,21 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
-
+from logging.handlers import RotatingFileHandler
+from src.config.paths import LOGS_FILE
 from src.pipelines.inference import inference_pipeline
 from src.pipelines.monitoring import monitoring_pipeline
 from src.pipelines.retrain_all import retrain_all_pipeline
 from src.pipelines.retrain_single import retrain_single_pipeline
 from pipelines.up_rows import update_rows_pipeline
 
-from src.config.state import load_state, save_state
+from src.config.state import load_state
 
-logging.basicConfig(level=logging.INFO)
+handler = RotatingFileHandler(LOGS_FILE,maxBytes=5_000_000,backupCount=3)
+logging.basicConfig(
+    level=logging.INFO, 
+    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+    handlers=[handler])
+
 logger = logging.getLogger(__name__)
 scheduler = BlockingScheduler()
 

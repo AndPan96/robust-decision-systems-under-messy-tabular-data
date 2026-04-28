@@ -24,7 +24,7 @@ def test_cross_validation(fake_load):
     
 
     with patch("src.training.cross_validation.preprocess_fit", side_effect=fake_preprocess_fit):
-        folds = generate_outer_folds(X, y, 5)
+        folds, imp_col_len = generate_outer_folds(X, y, 5)
 
     assert isinstance(folds, list)
     assert len(folds) == 5

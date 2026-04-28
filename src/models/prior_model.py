@@ -4,16 +4,19 @@ import torch.nn as nn
 class PriorModel(nn.Module):
 
     def __init__(self, num_classes):
-
+        super().__init__()
         self.num_classes = num_classes
-        self.logits = torch.log(torch.ones(num_classes) / num_classes)
+        self.register_buffer(
+            "logits",
+            torch.log(torch.ones(num_classes) / num_classes)
+        )
 
 
     def fit(self, y: torch.Tensor):
 
         counts = torch.bincount(y)
         probs = counts / counts.sum()
-        self.logits = torch.log(probs)
+        self.logits.data = torch.log(probs.to(self.logits.device))
 
 
     def forward(self, X: torch.Tensor):
@@ -26,10 +29,3 @@ class PriorModel(nn.Module):
         logits = self.forward(X)
         return torch.argmax(logits, dim=1)
     
-    def to(self, device):
-        self.logits = self.logits.to(device)
-        return self
-    
-    
-    def __call__(self, X):
-        return self.forward(X)
