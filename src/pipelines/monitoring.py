@@ -1,4 +1,5 @@
 from src.actions.monitor_model import monitor_model
+from src.actions.transform_data import transform_data
 from src.config.state import load_state, save_state
 import logging
 from src.config.registry import load_current_model
@@ -11,6 +12,12 @@ from src.utils.reports import generate_monitoring_report
 logger = logging.getLogger(__name__)
 
 def monitoring_pipeline():
+    needed = transform_data()
+    if needed:
+        logger.info("ELT operations performed from data/raw tables to data/raw/dataset.csv.")
+    else:
+        logger.info("No transformation needed: ELT operations skipped.")
+
     result = monitor_model()
     
     if result is None:
@@ -24,7 +31,10 @@ def monitoring_pipeline():
     plots_path = cast(Path, meta["plots_path"])
     metrics_path = report_path / "metrics.parquet"
 
-    df = pd.read_parquet(metrics_path)
+    if metrics_path.exists():
+        df = pd.read_parquet(metrics_path)
+    else:
+        df = pd.DataFrame(columns=["timestamp", "accuracy", "n_samples"])
     new_row = {
         "timestamp": pd.Timestamp.now(),
         "accuracy": result["accuracy"],

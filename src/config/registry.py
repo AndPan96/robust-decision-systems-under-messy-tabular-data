@@ -27,7 +27,7 @@ MODEL_REGISTRY = {
             "train_params": {
                 "lr" : .001,
                 "batch_size" : 256,
-                "steps": 35
+                "steps": 50
             }
         },
     "MLP": {
@@ -38,7 +38,7 @@ MODEL_REGISTRY = {
             "train_params": {
                 "lr" : .001,
                 "batch_size" : 256,
-                "steps": 35
+                "steps": 50
             }
         }
 }

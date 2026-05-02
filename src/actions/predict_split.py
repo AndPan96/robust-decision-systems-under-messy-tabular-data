@@ -6,7 +6,10 @@ def predict_split():
 
     ids, X, y = load_dataset(DATASET_PATH)
 
-    proc_idx = pd.read_parquet(PROCESSED_IDS)["SK_ID_CURR"]
+    if PROCESSED_IDS.exists():
+        proc_idx = pd.read_parquet(PROCESSED_IDS)["SK_ID_CURR"]
+    else:
+        proc_idx = pd.Series([], dtype=ids.dtype)
     mask_new = ~ids.isin(proc_idx)
     ids = ids[mask_new]
     X = X[mask_new]
@@ -17,4 +20,4 @@ def predict_split():
     X = X[mask]
 
     X.to_parquet(MONITORING_X)
-    ids.to_frame("ID").to_parquet(MONITORING_IDS)
+    ids.to_frame("SK_ID_CURR").to_parquet(MONITORING_IDS)

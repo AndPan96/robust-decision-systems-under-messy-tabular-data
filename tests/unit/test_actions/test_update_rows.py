@@ -9,8 +9,7 @@ from src.config.state import STATE_FILE
 def fake_ds():
     return pd.DataFrame({
         "SK_ID_CURR": [1, 2, 3],
-        "TARGET": [None, 1, None],
-        "F1": [10, 20, 30]
+        "TARGET": [None, 1, None]
     })
 
 def test_update_rows(fake_ds: pd.DataFrame):

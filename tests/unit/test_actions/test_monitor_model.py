@@ -9,7 +9,6 @@ from src.config.paths import PROCESSED_IDS, PROCESSED_PREDS, PROCESSED_X, \
 def fake_data():
 
     pred = pd.DataFrame({
-        "SK_ID_CURR": [1, 2, 3, 4, 5],
         "TARGET_PRED": [0, 1, 0, 1, 0]
     })
 
@@ -40,7 +39,7 @@ def test_monitor_model_threshold(fake_data):
     preds.to_parquet(PROCESSED_PREDS, index=False)
     ids.to_parquet(PROCESSED_IDS, index=False)
     X.to_parquet(PROCESSED_X, index=False)
-    raw.to_parquet(DATASET_PATH, index=False)
+    raw.to_csv(DATASET_PATH, index=False)
 
     with patch("src.actions.monitor_model.MONITOR_WINDOW", 3):
 
@@ -51,7 +50,7 @@ def test_monitor_model_threshold(fake_data):
         assert "retrain" in result
 
     preds.to_parquet(PROCESSED_PREDS, index=False)
-    raw.to_parquet(DATASET_PATH, index=False)
+    raw.to_csv(DATASET_PATH, index=False)
 
     with patch("src.actions.monitor_model.MONITOR_WINDOW", 10):
 

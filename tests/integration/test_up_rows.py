@@ -12,7 +12,6 @@ def test_update_rows_pipeline(set_environment, reset_environment):
 
         df = pd.DataFrame({
             "SK_ID_CURR": [1, 2, 3],
-            "F1": [.1, .2, .3],
             "TARGET": [None, None, 1]
         })
 

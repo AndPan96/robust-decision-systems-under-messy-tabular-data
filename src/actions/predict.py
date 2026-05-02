@@ -16,9 +16,11 @@ def append_parquet(path: Path, df: pd.DataFrame):
 
 def predict():
 
+    if not (MONITORING_IDS.exists() and MONITORING_X.exists()): return pd.DataFrame(columns=["TARGET_PRED"])
+
     ids = pd.read_parquet(MONITORING_IDS)
     if len(ids) == 0:
-        return []
+        return pd.DataFrame(columns=["TARGET_PRED"])
     X = pd.read_parquet(MONITORING_X)
 
     model, preprocessor, _ = load_current_model()

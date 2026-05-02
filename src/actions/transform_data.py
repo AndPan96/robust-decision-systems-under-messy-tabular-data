@@ -57,7 +57,7 @@ def transform_data():
     state = load_state()
     if state["transform_required"]:
 
-        application_train = pd.read_csv(RAW_APPLICATION_TRAIN)
+        application_train = pd.read_csv(RAW_APPLICATION_TRAIN, low_memory=False)
         bureau = pd.read_csv(RAW_BUREAU)
         bureau_balance = pd.read_csv(RAW_BUREAU_BALANCE)
         credit_card_balance = pd.read_csv(RAW_CREDIT_CARD_BALANCE)

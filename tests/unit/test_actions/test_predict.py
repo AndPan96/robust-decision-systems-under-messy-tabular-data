@@ -42,7 +42,7 @@ def test_predict(fake_load, fake_preprocessor):
         X: pd.DataFrame
         ids, X = fake_load
 
-        ids.to_frame("ID").to_parquet(MONITORING_IDS)
+        ids.to_frame("SK_ID_CURR").to_parquet(MONITORING_IDS)
         X.to_parquet(MONITORING_X)
 
         fake_model = DummyModel().to(DEVICE)

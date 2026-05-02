@@ -4,7 +4,7 @@ from pathlib import Path
 STATE_FILE = Path("data/state/state.json")
 
 DEFAULT_STATE = {
-    "retrain_required": False,
+    "retrain_required": True,
     "retrain_single": False,
     "retrain_all": False,
     "transform_required": True
