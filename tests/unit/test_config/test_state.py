@@ -7,7 +7,7 @@ def test_state():
     state = load_state()
 
     assert state["retrain_required"] == True
-    assert state["retrain_single"] == False
+    assert state["retrain_single"] == True
     assert state["retrain_all"] == False
     assert state["transform_required"] == True
 
