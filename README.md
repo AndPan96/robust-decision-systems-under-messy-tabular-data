@@ -40,7 +40,9 @@ Data coming from the 7 raw files
 - previous_application.csv
 
 get transformed and saved into the "dataset.csv" file. \
-A state variable signals the need to perform such procedure, at the beginning and every time an update loads new data on the raw files. \
+A state variable signals the need to perform such procedure, at the beginning and every time an update loads new data on the raw files. 
+
+### Transform
 Features of secondary tables get collapsed and aggregated, following the tree structure of the database, and mean, standard deviation or count get merged to parents:
 - bureau_balance: 
     1. "MONTHS_BALANCE" -> "BB_MB_MEAN", "BB_MB_STD", "BB_COUNT" (count)
@@ -91,7 +93,9 @@ y has 0 (0%) null values: no row has been filtered in "application_train.csv". \
 This step is separated from ELT transformation because it relies on a specific instance of training data, to be consistent with the current model at use, rather than on raw data updates. \
 During training, a new preprocessor for the current training data gets created. \
 Once a model gets deployed, such preprocessor gets saved too. \
-At inference, the same preprocessor gets loaded. \
+At inference, the same preprocessor gets loaded. 
+
+### Preprocessor Algorithm
 The defined preprocess procedure, receives the training set, without SK_ID_CURR and TARGET columns, and returns both the trained preprocessor and the processed training data. \
 To handle NaN or Null values, FEATURE_SCHEMA divides features into "mean", "zero" and "binary", to specify whether to perform imputation on the column mean, padding to 0 or to add an "UNKNOWN" label for values not in {0, 1}. \
 Both "mean" and "zero" features get then scaled, while "binary" 3 ({0,1,UNKNOWN}) features get one-hot encoded.
@@ -146,11 +150,15 @@ When monitoring triggers retraining, the system performs the following in order,
 - Retrain all models in MODEL_REGISTRY on fresher data
 - Keep the system in an idle state, pausing inference, and send a notification email
 
-In order to succeed, a model needs to score above a configurable DEPLOY_THRESHOLD, here set to 0.75 and suggested to be slightly higher than RETRAIN_THRESHOLD to prevent frequent retrainings. \
+In order to succeed, a model needs to score above a configurable DEPLOY_THRESHOLD, here set to 0.75 and suggested to be slightly higher than RETRAIN_THRESHOLD to prevent frequent retrainings. 
+
+### Training Algorithm
 The training procedure, first gets all "dataset.csv" rows with "TARGET", then filtering the top TEST_WINDOW (here 50k) and the following top TRAIN_WINDOW (here 200k), both configurable. \
 To contain overfitting, training data get split in a configurable CV_FOLDS (here 3) number of folds, for a validation step. \
 Each training fold get furtherly split in DRO_GROUPS folds over time (here 3), so to perform Group DRO: at each step one batch per fold gets evaluated and the gradient becomes the softmax of all gradient the batch of each group gave. \
-Group DRO uses a loss that promotes a bounded loss across all groups, so here it promotes a representation that is robust over time. \
+Group DRO uses a loss that promotes a bounded loss across all groups, so here it promotes a representation that is robust over time. 
+
+### Model Selection
 Each model gets then retrained over all training data and the one with higher Average Accuracy over CV folds gets selected. \
 Preprocessors get fit with each CV fold and overall data as well in the process. \
 When a model gets deployed, it gets saved and its monitoring reports folder gets created below "reports_mntr". \
@@ -194,7 +202,7 @@ The only halting operation expected is all registry training failure against the
 They tests all code but for "scheduler.py" and "docker/Dockerfile", even if they try to simulate all possible code flows.
 
 
-# Possible Improvements
+## Possible Improvements
 The project has the goal of showing understanding of theoretical and MLOps concepts. Possible improvements are:
 - Monitoring not only model performance but also univariate and covariate shifts.
 - Extend static training with meta-optimization, either based on Genetic Algorithms or Bayesian Optimization
