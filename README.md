@@ -44,8 +44,10 @@ A state variable signals the need to perform such procedure, at the beginning an
 
 ### Transform
 Features of secondary tables get collapsed and aggregated, following the tree structure of the database, and mean, standard deviation or count get merged to parents:
+```
 - bureau_balance: 
     1. "MONTHS_BALANCE" -> "BB_MB_MEAN", "BB_MB_STD", "BB_COUNT" (count)
+
 - bureau:
     1. "DAYS_ENDDATE_FACT" -> "B_ENDDATE_MEAN", "B_ENDDATE_STD"
     2. "CNT_CREDIT_PROLONG" -> "B_PROLONG_MEAN", "B_PROLONG_STD"
@@ -54,16 +56,20 @@ Features of secondary tables get collapsed and aggregated, following the tree st
     5. "BB_MB_MEAN" -> "BB_MB_MEAN"
     6. "BB_MB_STD" -> "BB_MB_STD" (mean)
     7. "BB_COUNT" -> "BB_COUNT" (mean), "B_COUNT" (count non 0)
+
 - POS_CASH_balance:
     1. "SK_DPD" -> "PCB_DPD_MEAN"
     2. "SK_DPD_DEF" -> "PCB_DPD_DEF_MEAN"
+
 - installments_payments:
     1. "DAYS_ENTRY_PAYMENT", "DAYS_INSTALMENT" -> "DAYS_INSTALLMENT_DELAY" (diff) -> "IP_DELAY_MEAN", "IP_DELAY_STD"
     2. "AMT_PAYMENT", "AMT_INSTALMENT" -> "AMT_PAYMENT_DIFF" (diff) -> "IP_AMT_DIFF_MEAN", "IP_AMT_DIFF_STD"
+
 - credit_card_balance:
     1. "AMT_BALANCE" -> "CCB_AMT_BALANCE_MEAN", "CCB_AMT_BALANCE_STD"
     2. "SK_DPD" -> "CCB_SK_DPD_MEAN", "CCB_SK_DPD_STD"
     3. "SK_DPD_DEF" -> "CCB_SK_DPD_DEF_MEAN", "CCB_SK_DPD_DEF_STD"
+
 - previous_application:
     1. "AMT_ANNUITY" -> "PA_AMT_ANNUITY_MEAN", "PA_AMT_ANNUITY_STD"
     2. "AMT_APPLICATION" -> "PA_AMT_APPLICATION_MEAN", "PA_AMT_APPLICATION_STD"
@@ -82,7 +88,7 @@ Features of secondary tables get collapsed and aggregated, following the tree st
     15. "CCB_SK_DPD_STD" -> "CCB_SK_DPD_STD" (mean)
     16. "CCB_SK_DPD_DEF_MEAN" -> "CCB_SK_DPD_DEF_MEAN"
     17. "CCB_SK_DPD_DEF_STD" -> "CCB_SK_DPD_DEF_STD" (mean)
-
+```
 "AMT_INCOME_TOTAL", "AMT_CREDIT", "AMT_ANNUITY" are the only selected features of "application_train.csv", with "SK_ID_CURR" that acts as row id and "TARGET" which is indeed the target of prediction, both to be removed to prevent leakage and present only to track data. \
 "dataset.csv" features follow a schema saved in the FEATURE_SCHEMA variable.
 
