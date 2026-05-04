@@ -5,7 +5,7 @@ STATE_FILE = Path("data/state/state.json")
 
 DEFAULT_STATE = {
     "retrain_required": True,
-    "retrain_single": False,
+    "retrain_single": True,
     "retrain_all": False,
     "transform_required": True
 }
