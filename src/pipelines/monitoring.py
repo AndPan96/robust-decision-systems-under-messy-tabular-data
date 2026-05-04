@@ -43,7 +43,7 @@ def monitoring_pipeline():
     df.loc[len(df)] = new_row
     df.to_parquet(metrics_path)
 
-    generate_monitoring_plot(metrics_path, plots_path)
+    generate_monitoring_plot(metrics_path, plots_path / "monitoring.png")
     logger.info(f"Monitoring plots saved in {plots_path}.")
 
     generate_monitoring_report(report_path)
