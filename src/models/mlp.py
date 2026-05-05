@@ -7,9 +7,9 @@ class MLP(nn.Module):
         super().__init__()
 
         self.net = nn.Sequential(
-            nn.Linear(input_dim, 64),
+            nn.Linear(input_dim, 32),
             nn.LeakyReLU(),
-            nn.Linear(64, num_classes)
+            nn.Linear(32, num_classes)
         )
 
 

@@ -14,20 +14,23 @@ def test_retrain_all_pipeline(set_environment, reset_environment):
                 "class": PriorModel,
                 "arch_params": {"num_classes": 2},
                 "train_params": {"lr": "NA", "batch_size": "NA", "steps": "NA"}
-            },
+            }
+            ,
             "LinearModel": {
                 "class": LinearModel,
                 "arch_params": {"num_classes": 2},
-                "train_params": {"lr": .01, "batch_size": 256, "steps": 2}
-            },
+                "train_params": {"lr": .001, "batch_size": 256, "steps": 11}
+            }
+            ,
             "MLP": {
                 "class": MLP,
                 "arch_params": {"num_classes": 2},
-                "train_params": {"lr": .01, "batch_size": 256, "steps": 2}
+                "train_params": {"lr": .001, "batch_size": 256, "steps": 11}
             }
         }
 
-        with patch("src.actions.train_model.MODEL_REGISTRY", test_registry):
+        with patch("src.actions.train_model.MODEL_REGISTRY", test_registry), \
+            patch("src.actions.train_all.MODEL_REGISTRY", test_registry):
             retrain_all_pipeline()
 
     finally:

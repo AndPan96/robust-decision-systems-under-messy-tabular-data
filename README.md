@@ -121,7 +121,7 @@ Defined as a Pytorch Module subclass, when coupled with a softmax function is eq
 
 ### MLP
 Defined as a Pytorch Module subclass, is a 2 Layer Perceptron. \
-The intermediate dimension is fixed to 64.
+The intermediate dimension is fixed to 32.
 
 
 ## Updating
@@ -143,7 +143,7 @@ If the score goes below a configurable threshold RETRAIN_THRESHOLD, here set to 
 The results of monitoring get stored in a folder created ad hoc when the model was saved, under the "reports_mntr" folder. \
 Results are visible as an HTML report that gets updated when monitoring runs. \
 To prevent the first predictions of a model to weight too heavily on retraining triggering, a minimum size is needed for monitoring, configurable as MONITORING_WINDOW, here set to 5k.
-
+![not found in path](fig/monitoring.png)
 
 ## Training
 There are 2 training pipelines:
@@ -172,7 +172,9 @@ Both single model and all registry training create ad have reports, that get sav
 Single training folder shows mean and variance of both training folds and validation folds. \
 All registry training shows such plot for each model and one comprehensive model comparing mean validation mean and std at model selection. \
 Results are visible in an HTML report as for monitoring.
-
+![not found in path](fig/comparison.png)
+![not found in path](fig/LinearModel_dvTBD_splits3_lr0.001_bs256_steps51.png)
+![not found in path](fig/MLP_dvTBD_splits3_lr0.001_bs256_steps51.png)
 
 ## Pipelines and Orchestration
 Actions performed by the system are combined in the following pipelines:
@@ -208,6 +210,13 @@ The only halting operation expected is all registry training failure against the
 They tests all code but for "scheduler.py" and "docker/Dockerfile", even if they try to simulate all possible code flows.
 
 
+## Results
+As shawn by the training reports used as examples, training algorithm works correctly. \
+Group DRO is effective at making models better at generalization, even without the usage of any regularizer term. \
+In the Linear Model case, the training loss is higher than the validation because the DRO loss is generally higher than the simple one, since it is min-maxing. \
+Is is easy to note that, despite that and the feature engineering attempt, input features are not very informative and the focus of practitioners for a possible application should focus on that.
+
+
 ## Possible Improvements
 The project has the goal of showing understanding of theoretical and MLOps concepts. Possible improvements are:
 - Monitoring not only model performance but also univariate and covariate shifts.
@@ -215,6 +224,7 @@ The project has the goal of showing understanding of theoretical and MLOps conce
 - Make a configurable set of collectable metrics, for optimization or reporting purposes
 - Add a per model preprocessing in between data dependent existing preprocessing and models, with a PREPROCESSING_REGISTRY to reference in MODEL_REGISTRY configurations
 - Add a proper interface to expose a web API to make the model a Web Service
+- Add data versioning to make all results reproducible even after a Raw Table Update
 
 
 ## References
